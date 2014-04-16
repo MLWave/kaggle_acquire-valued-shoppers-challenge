@@ -1,15 +1,28 @@
-#Kaggle Challenge: 
-#"http://www.kaggle.com/c/acquire-valued-shoppers-challenge/" 
-#'Reduce the data and generate features' by Triskelion 
-#After a forum post by BreakfastPirate
-#Very mediocre and hacky code, single-purpose, but pretty fast
+# -*- coding: UTF-8 -*-
+
+"""
+Kaggle Challenge: 
+"http://www.kaggle.com/c/acquire-valued-shoppers-challenge/" 
+'Reduce the data and generate features' by Triskelion 
+After a forum post by BreakfastPirate
+Very mediocre and hacky code, single-purpose, but pretty fast
+Some refactoring by Zygmunt Zając <zygmunt@fastml.com>
+"""
 
 from datetime import datetime, date
 from collections import defaultdict
 
-loc_offers = "kaggle_shop\\offers.csv"
-loc_transactions = "kaggle_shop\\transactions.csv"
-loc_reduced = "kaggle_shop\\reduced2.csv" # will be created
+loc_offers = "data/offers.csv"
+loc_transactions = "data/transactions.csv"
+loc_train = "data/trainHistory.csv"
+loc_test = "data/testHistory.csv"
+
+# will be created
+loc_reduced = "data/reduced.csv" 
+loc_out_train = "data/train.vw"
+loc_out_test = "data/test.vw"
+
+###
 
 def reduce_data(loc_offers, loc_transactions, loc_reduced):
   start = datetime.now()
@@ -38,6 +51,7 @@ def reduce_data(loc_offers, loc_transactions, loc_reduced):
 
 #reduce_data(loc_offers, loc_transactions, loc_reduced)
 
+
 def diff_days(s1,s2):
 	date_format = "%Y-%m-%d"
 	a = datetime.strptime(s1, date_format)
@@ -45,12 +59,6 @@ def diff_days(s1,s2):
 	delta = b - a
 	return delta.days
 
-
-loc_train = "kaggle_shop\\trainHistory.csv"
-loc_test = "kaggle_shop\\testHistory.csv"
-loc_transactions = "kaggle_shop\\reduced2.csv"
-loc_out_train = "kaggle_shop\\train.vw"
-loc_out_test = "kaggle_shop\\test.vw"
 def generate_features(loc_train, loc_test, loc_transactions, loc_out_train, loc_out_test):
 	#keep a dictionary with the offerdata
 	offers = {}
@@ -215,26 +223,13 @@ def generate_features(loc_train, loc_test, loc_transactions, loc_out_train, loc_
 				last_id = row[0]
 				if e % 100000 == 0:
 					print e
+					
 #generate_features(loc_train, loc_test, loc_transactions, loc_out_train, loc_out_test)
-loc_preds = "kaggle_shop\\shop.preds.txt"
-loc_test = "kaggle_shop\\testHistory.csv"
-loc_submission = "kaggle_shop\\kaggle.submission2.csv"
 
-def generate_submission(loc_preds, loc_test, loc_submission):
-	preds = {}
-	for e, line in enumerate( open(loc_preds) ):
-		row = line.strip().split(" ")
-		preds[ row[1] ] = row[0]
-		
+
+if __name__ == '__main__':
+	reduce_data(loc_offers, loc_transactions, loc_reduced)
+	generate_features(loc_train, loc_test, loc_reduced, loc_out_train, loc_out_test)
+
 	
-	with open(loc_submission, "wb") as outfile:
-		for e, line in enumerate( open(loc_test) ):
-			if e == 0:
-				outfile.write( "id,repeatProbability\n" )
-			else:
-				row = line.strip().split(",")
-				if row[0] not in preds:
-					outfile.write(row[0]+",0\n")
-				else:
-					outfile.write(row[0]+","+preds[row[0]]+"\n")
-#generate_submission(loc_preds, loc_test, loc_submission)
+	
