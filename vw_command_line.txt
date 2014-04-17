@@ -1,0 +1,2 @@
+vw train.vw -c -k --passes 40 -l 0.85 -f model.vw --loss_function quantile --quantile_tau 0.6
+vw test.vw -t -i model.vw -p shop.preds.txt
